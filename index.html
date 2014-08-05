@@ -101,9 +101,16 @@ info.update = function (properties) {
 MapInfo = function () {
     var map;
     var route_layer;
-    var service_tickets_layer = L.geoJson(null, {pointToLayer: function (feature, latlng) {
+    var service_tickets_layer = L.geoJson(null,
+            {pointToLayer: function (feature, latlng) {
                     return  L.marker(latlng, service_style(feature));
-                } }
+                },
+            onEachFeature: function(feature, layer){
+                var service_cart =  feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
+                layer.bindPopup('<b>Address:</b> <br />' + feature.properties.house_number +  ' '  + feature.properties.street_name
+                       + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
+                       +  '<br /><b>Serial </b> <br />'  + service_cart );
+            }}
 
    );
     //https://s3.amazonaws.com/cartlogic/img/cart_image.png
