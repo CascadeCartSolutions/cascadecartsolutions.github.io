@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Naperville Cart Delivery Map</title>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <link rel="points" type="application/json" href="gis/naperville_collection_districts.geojson">
+    <style>
+        #map {
+            height: 700px;
+            width: 500px;
+        }
+
+        .info {
+            padding: 10px 10px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .legend {
+            line-height: 18px;
+            color: #555;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+
+    </style>
+</head>
+<body>
+<div>
+    <div id="map"></div>
+
+</div>
+<script type="application/javascript">
+var base_tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/joebeone.j45kje9k/{z}/{x}/{y}.png', {
+    attribution: 'By Joe Bennett &copy CartLogic-Cascade Engineering, Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    maxZoom: 18
+})
+
+var route_completed_services = {};
+var info = L.control();
+
+var legend = L.control({position: 'bottomright'});
+
+function getColor(count) {
+    return count >= 100 ? '#238b45' :
+                    count >= 75 ? '#74c476' :
+                    count >= 50 ? '#bae4b3' :
+                    count >= 25 ? '#edf8e9' :
+            '#edf8e9';
+}
+
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+            grades = [0, 25, 50, 75, 100],
+            labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '%');
+    }
+
+    return div;
+};
+
+
+info.onAdd = function (map) {
+    this.__div = L.DomUtil.create('div', 'info') //div with class 'info'
+    this.update();
+    return this.__div;
+};
+
+info.update = function (properties) {
+    this.__div.innerHTML = '<h4>Waste District</h4>' + (properties ?
+            '<b>' + properties.DISTAREA + '</b><br /><br />' + properties.COMPLETED.toFixed(0) + '% COMPLETE</h3>'
+            : 'Hover over a waste district to show % complete.');
+};
+
+// Main function for getting geojson and mapping services.
+MapInfo = function () {
+    var map;
+    var route_layer;
+    var service_tickets_layer;
+    //https://s3.amazonaws.com/cartlogic/img/cart_image.png
+    function setComplete(feature) {
+
+        $.each(route_completed_services, function (index, route) {
+            if (route.status__route__route == feature.properties.DISTAREA) {
+                feature.properties.COMPLETED = route.value;
+            }
+        });
+
+        feature.properties.COMPLETED = (feature.properties.COMPLETED / feature.properties.adrs_count).toFixed(2) * 100;
+
+    }
+
+    var cartIcon = L.icon(
+            {
+                iconUrl: 'https://s3.amazonaws.com/cartlogic/img/cart_image.png',
+                iconSize: [22, 33], // size of the icon
+                iconAnchor: [16, 37],
+                popupAnchor: [0, -28]
+            }
+    );
+
+
+    function service_sytle(feature) {
+        return{
+            icon: cartIcon,
+            iconAnchor: [16, 37],
+            popupAnchor: [0, -28]
+
+        }
+    }
+
+    function route_style(feature) {
+        setComplete(feature);
+        return {
+            fillColor: getColor(feature.properties.COMPLETED),
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.71
+        };
+    }
+
+
+    //Call CarLogic ticket list for all tickets
+    function GetServiceTickets(min_lat_lon, max_lat_lon) {
+        console.log(min_lat_lon, max_lat_lon);
+        //#TODO call with bounding box parameters
+        $.ajax({
+            type: 'GET',
+            url: 'http://stage2.gocartlogic.com/api/2/ticket/list/?format=geo&page_size=1000',
+            data: {'bounding_box': min_lat_lon[0] + "," + min_lat_lon[1] + "," + max_lat_lon[0] + "," + max_lat_lon[1] },
+            success: function (data) {
+                var service_tickets_layer = L.geoJson(data.results, {pointToLayer: function (feature, latlng) {
+                    return L.marker(latlng, {icon: cartIcon});
+                } });
+                service_tickets_layer.addTo(map);
+                console.log(data);
+
+
+            },
+            //Need to add Authorization Token to the call
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+            }
+
+        });
+
+    };
+
+
+    //Get map geojson file.
+    $.getJSON($('link[rel="points"]').attr("href"), function (data) {
+
+        function onEachFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomToFeature
+            });
+
+        };
+
+
+        function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+        }
+
+        function resetHighlight(e) {
+            //#TODO fix this ... calling reset adds to completed
+            route_layer.resetStyle(e.target);
+            info.update();
+        }
+
+        function highlightFeature(e) {
+            //Highlights on hover over
+            var layer = e.target;
+
+            info.update(layer.feature.properties);
+
+            layer.setStyle({
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
+            //Won't work in IE or Opera
+            if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+            }
+        }
+
+
+        route_layer = L.geoJson(data, {
+            style: route_style,
+            onEachFeature: onEachFeature
+
+        });
+
+        map = L.map('map').fitBounds(route_layer.getBounds());
+        base_tiles.addTo(map);
+        route_layer.addTo(map);
+        info.addTo(map);
+        legend.addTo(map);
+
+        map.on('moveend', function () {
+            if (map.getZoom() >= 17) {
+
+                //#TODO declar layer earlier and just remove plus add new data as need like the below sample
+
+
+                map.removeLayer(route_layer);
+
+                if (map.hasLayer(service_tickets_layer)) {
+                    service_tickets_layer.clearLayers();
+                }
+
+                //North East Coords of the map
+                var max_lat_lon = [map.getBounds()._northEast.lat, map.getBounds()._northEast.lng];
+                //South West Coords of the map
+                var min_lat_lon = [map.getBounds()._southWest.lat, map.getBounds()._southWest.lng];
+                GetServiceTickets(min_lat_lon, max_lat_lon);
+                console.log(data);
+                console.log(map.getZoom());
+                console.log(map.getBounds());
+            } else {
+                //need to add the route layer back in
+                route_layer.addTo(map);
+                //remove the service_ticket layer if its there
+                if (map.hasLayer(service_tickets_layer)) {
+                    service_tickets_layer.clearLayers();
+                }
+            }
+        })
+    });
+
+};
+
+
+//Call CartLogic ticket stats get completed by route totals
+GetCartLogicStatus = function () {
+
+    $.ajax({
+                type: 'GET',
+                url: "http://stage2.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
+                dataType: 'json',
+                success: function (data) {
+                    route_completed_services = data;
+                    MapInfo();
+                    console.log("called GetCollectionRouteDay....")
+
+                },
+                //Need to add Authorization Token to the call
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                }
+            }
+    );
+
+    return route_completed_services;
+
+};
+
+GetCartLogicStatus();
+
+
+</script>
+</body>
