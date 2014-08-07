@@ -40,7 +40,6 @@
             opacity: 0.7;
         }
 
-
     </style>
 </head>
 <body>
@@ -56,7 +55,7 @@ var base_tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/joebeone.j45kje9k/{
 
 var route_completed_services = {};
 var info = L.control();
-
+var loading = L.control({position: 'topright'});
 var legend = L.control({position: 'bottomright'});
 
 function getColor(count) {
@@ -76,7 +75,7 @@ legend.onAdd = function (map) {
 
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
-        div.innerHTML +=
+        div.innerHTML =
                 '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
                 grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '%');
     }
@@ -92,10 +91,23 @@ info.onAdd = function (map) {
 };
 
 info.update = function (properties) {
-    this.__div.innerHTML = '<h4>Waste District</h4>' + (properties ?
+    this.__div.innerHTML = '<h4>Waste Route</h4>' + (properties ?
             '<b>' + properties.DISTAREA + '</b><br /><br />' + properties.COMPLETED.toFixed(0) + '% COMPLETE</h3>'
             : 'Hover over a waste district to show % complete.');
 };
+
+loading.update = function(){
+    this.__div.innerHTML='<img src="img/ajax-loader.gif" style="{opacity: 0.2; filter: alpha(opacity=20);}"/>'
+}
+
+loading.onAdd = function(map){
+    this.__div = L.DomUtil.create('div', 'info') //div with class 'info'
+    this.update();
+    return this.__div;
+
+};
+
+
 
 // Main function for getting geojson and mapping services.
 MapInfo = function () {
@@ -103,17 +115,16 @@ MapInfo = function () {
     var route_layer;
     var service_tickets_layer = L.geoJson(null,
             {pointToLayer: function (feature, latlng) {
-                    return  L.marker(latlng, service_style(feature));
-                },
-            onEachFeature: function(feature, layer){
-                var service_cart =  feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
-                layer.bindPopup('<b>Address:</b> <br />' + feature.properties.house_number +  ' '  + feature.properties.street_name
-                       + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
-                       +  '<br /><b>Serial </b> <br />'  + service_cart );
-            }}
+                return  L.marker(latlng, service_style(feature));
+            },
+                onEachFeature: function (feature, layer) {
+                    var service_cart = feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
+                    layer.bindPopup('<b>Address:</b> <br />' + feature.properties.house_number + ' ' + feature.properties.street_name
+                            + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
+                            + '<br /><b>Serial </b> <br />' + service_cart);
+                }}
+    );
 
-   );
-    //https://s3.amazonaws.com/cartlogic/img/cart_image.png
     function setComplete(feature) {
 
         $.each(route_completed_services, function (index, route) {
@@ -161,14 +172,15 @@ MapInfo = function () {
 
     //Call CarLogic ticket list for all tickets
     function GetServiceTickets(min_lat_lon, max_lat_lon) {
-        console.log(min_lat_lon, max_lat_lon);
+
         //#TODO call with bounding box parameters
         $.ajax({
             type: 'GET',
-            url: 'http://stage2.gocartlogic.com/api/2/ticket/list/?format=geo&page_size=1000',
+            url: 'http://stage1.gocartlogic.com/api/2/ticket/list/?format=geo&page_size=1000',
             data: {'bounding_box': min_lat_lon[0] + "," + min_lat_lon[1] + "," + max_lat_lon[0] + "," + max_lat_lon[1] },
             success: function (data) {
-                if (map.hasLayer(service_tickets_layer)) {
+                $(".info").hide();
+               if (map.hasLayer(service_tickets_layer)) {
                     service_tickets_layer.clearLayers();
                 } else {
                     service_tickets_layer.addTo(map);
@@ -182,9 +194,9 @@ MapInfo = function () {
 
                 }
                 service_tickets_layer.addData(data.results);
-              //  service_tickets_layer.setStyle();
+                loading.removeFrom(map);
 
-
+                //  service_tickets_layer.setStyle();
             },
             //Need to add Authorization Token to the call
             beforeSend: function (xhr) {
@@ -250,30 +262,32 @@ MapInfo = function () {
         info.addTo(map);
         legend.addTo(map);
 
+
+
         map.on('moveend', function () {
             if (map.getZoom() >= 18) {
 
-                //#TODO declar layer earlier and just remove plus add new data as need like the below sample
-
+                //#TODO declare layer earlier and just remove plus add new data as need like the below sample
 
                 map.removeLayer(route_layer);
-                $(".legend").fadeTo("slow", 0.0);
+                loading.addTo(map);
+                $("#legend").fadeOut();
 
                 //North East Coords of the map
                 var max_lat_lon = [map.getBounds()._northEast.lat, map.getBounds()._northEast.lng];
                 //South West Coords of the map
                 var min_lat_lon = [map.getBounds()._southWest.lat, map.getBounds()._southWest.lng];
                 GetServiceTickets(min_lat_lon, max_lat_lon);
-                console.log(data);
-                console.log(map.getZoom());
-                console.log(map.getBounds());
+
             } else {
                 //need to add the route layer back in
                 route_layer.addTo(map);
+                $(".legend").fadeIn();
+                $(".info").fadeIn();
+
                 //remove the service_ticket layer if its there
                 if (map.hasLayer(service_tickets_layer)) {
                     service_tickets_layer.clearLayers()
-                    $(".legend").fadeTo("slow", 0.9);
 
                 }
             }
@@ -288,13 +302,11 @@ GetCartLogicStatus = function () {
 
     $.ajax({
                 type: 'GET',
-                url: "http://stage2.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
+                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
                 dataType: 'json',
                 success: function (data) {
                     route_completed_services = data;
                     MapInfo();
-                    console.log("called GetCollectionRouteDay....")
-
                 },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
