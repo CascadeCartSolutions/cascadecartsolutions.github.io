@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
     <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
     <link rel="points" type="application/json" href="gis/naperville_collection_districts.geojson">
     <style>
         #map {
@@ -44,6 +45,7 @@
 </head>
 <body>
 <div>
+    <div style="position:absolute; left: 600px; top:100px;" class="ui-widget"><label for="address"> Find my Address: </label><input id="address"></div>
     <div id="map"></div>
 
 </div>
@@ -96,11 +98,11 @@ info.update = function (properties) {
             : 'Hover over a waste district to show % complete.');
 };
 
-loading.update = function(){
-    this.__div.innerHTML='<img src="img/ajax-loader.gif" style="{opacity: 0.2; filter: alpha(opacity=20);}"/>'
+loading.update = function () {
+    this.__div.innerHTML = '<img src="img/ajax-loader.gif" style="{opacity: 0.2; filter: alpha(opacity=20);}"/>'
 }
 
-loading.onAdd = function(map){
+loading.onAdd = function (map) {
     this.__div = L.DomUtil.create('div', 'info') //div with class 'info'
     this.update();
     return this.__div;
@@ -108,11 +110,50 @@ loading.onAdd = function(map){
 };
 
 
-
 // Main function for getting geojson and mapping services.
 MapInfo = function () {
     var map;
     var route_layer;
+    $("#address").autocomplete({
+       source: function(request, response){
+           $.ajax({
+               url: "http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
+               dataType: "json",
+               data: {
+                   house_number: request.term
+               },
+               success: function(data){
+                   if (data.results.length >  0){
+                       $("#address_fill").val(data.results[0].location);
+                       console.log(data.results);
+                       var address_array = [];
+                       for (i = 0; i < data.results.length; i++){
+                          // jquery auto complete likes
+                          data.results[i].value = data.results[i].location.replace('-', ' ');
+                          data.results[i].label = data.results[i].location.replace('-', ' ');
+                       }
+                       response(data.results);
+                   }
+
+
+               },
+                          //Need to add Authorization Token to the call
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+            }
+           });
+       },
+
+       //"http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
+       minLength: 2,
+       select: function(event, ui){
+          // console.log(event);
+           console.log(ui);
+       },
+      autoFocus: true
+
+
+    });
     var service_tickets_layer = L.geoJson(null,
             {pointToLayer: function (feature, latlng) {
                 return  L.marker(latlng, service_style(feature));
@@ -180,7 +221,7 @@ MapInfo = function () {
             data: {'bounding_box': min_lat_lon[0] + "," + min_lat_lon[1] + "," + max_lat_lon[0] + "," + max_lat_lon[1] },
             success: function (data) {
                 $(".info").hide();
-               if (map.hasLayer(service_tickets_layer)) {
+                if (map.hasLayer(service_tickets_layer)) {
                     service_tickets_layer.clearLayers();
                 } else {
                     service_tickets_layer.addTo(map);
@@ -263,7 +304,6 @@ MapInfo = function () {
         legend.addTo(map);
 
 
-
         map.on('moveend', function () {
             if (map.getZoom() >= 18) {
 
@@ -298,29 +338,30 @@ MapInfo = function () {
 
 
 //Call CartLogic ticket stats get completed by route totals
-GetCartLogicStatus = function () {
+        GetCartLogicStatus = function () {
 
-    $.ajax({
-                type: 'GET',
-                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
-                dataType: 'json',
-                success: function (data) {
-                    route_completed_services = data;
-                    MapInfo();
-                },
-                //Need to add Authorization Token to the call
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
-                }
-            }
-    );
+            $.ajax({
+                        type: 'GET',
+                        url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
+                        dataType: 'json',
+                        success: function (data) {
+                            route_completed_services = data;
+                            MapInfo();
+                        },
+                        //Need to add Authorization Token to the call
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                        }
+                    }
+            );
 
-    return route_completed_services;
+            return route_completed_services;
 
-};
+        };
 
-GetCartLogicStatus();
+    GetCartLogicStatus();
 
 
 </script>
 </body>
+
