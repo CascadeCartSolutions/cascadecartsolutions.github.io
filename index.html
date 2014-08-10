@@ -8,6 +8,12 @@
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
     <link rel="points" type="application/json" href="gis/naperville_collection_districts.geojson">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+
     <style>
         #map {
             height: 700px;
@@ -21,6 +27,11 @@
             background: rgba(255, 255, 255, 0.8);
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             border-radius: 5px;
+        }
+
+        .ui-autocomplete-loading {
+            background: white url("img/ajax-loader.gif") right center no-repeat;
+            background-size: 16px 16px;
         }
 
         .info h4 {
@@ -45,8 +56,14 @@
 </head>
 <body>
 <div>
-    <div style="position:absolute; left: 600px; top:100px;" class="ui-widget"><label for="address"> Find my Address: </label><input id="address"></div>
     <div id="map"></div>
+    <div></div>
+    <div style="margin-left: 600px; margin-top:-500px;" class="ui-widget"><label for="address"><span class='glyphicon glyphicon-search'></span> Search
+        Address: </label><input id="address">
+
+        <div id="service_info" style="margin-left: 120px; display: none"></div>
+    </div>
+
 
 </div>
 <script type="application/javascript">
@@ -114,56 +131,26 @@ loading.onAdd = function (map) {
 MapInfo = function () {
     var map;
     var route_layer;
-    $("#address").autocomplete({
-       source: function(request, response){
-           $.ajax({
-               url: "http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
-               dataType: "json",
-               data: {
-                   house_number: request.term
-               },
-               success: function(data){
-                   if (data.results.length >  0){
-                       $("#address_fill").val(data.results[0].location);
-                       console.log(data.results);
-                       var address_array = [];
-                       for (i = 0; i < data.results.length; i++){
-                          // jquery auto complete likes
-                          data.results[i].value = data.results[i].location.replace('-', ' ');
-                          data.results[i].label = data.results[i].location.replace('-', ' ');
-                       }
-                       response(data.results);
-                   }
-
-
-               },
-                          //Need to add Authorization Token to the call
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+    var cart_window = function (feature, layer) {
+        var service_cart = feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
+        layer.bindPopup('<b>Address:</b> <br />' + feature.properties.house_number + ' ' + feature.properties.street_name
+                + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
+                + '<br /><b>Serial </b> <br />' + service_cart);
+    }
+    var house_layer = L.geoJson(null,
+            {pointToLayer: function (feature, latlng) {
+                return  L.marker(latlng, service_style(feature));
+            },
+                onEachFeature: cart_window
             }
-           });
-       },
+    );
 
-       //"http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
-       minLength: 2,
-       select: function(event, ui){
-          // console.log(event);
-           console.log(ui);
-       },
-      autoFocus: true
-
-
-    });
     var service_tickets_layer = L.geoJson(null,
             {pointToLayer: function (feature, latlng) {
                 return  L.marker(latlng, service_style(feature));
             },
-                onEachFeature: function (feature, layer) {
-                    var service_cart = feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
-                    layer.bindPopup('<b>Address:</b> <br />' + feature.properties.house_number + ' ' + feature.properties.street_name
-                            + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
-                            + '<br /><b>Serial </b> <br />' + service_cart);
-                }}
+                onEachFeature: cart_window
+            }
     );
 
     function setComplete(feature) {
@@ -187,10 +174,26 @@ MapInfo = function () {
             }
     );
 
+    var ticketIcon = L.icon(
+            {
+                iconUrl: 'img/map-flag.png',
+                iconSize: [40, 40], // size of the icon
+                iconAnchor: [16, 37],
+                popupAnchor: [0, -28]
+            }
+    );
+
 
     function service_style(feature) {
+        var icon = {};
+        if (feature.properties.status == 'OPEN') {
+            console.log(feature.properties.status);
+            icon = ticketIcon;
+        } else {
+            icon = cartIcon;
+        }
         return{
-            icon: cartIcon,
+            icon: icon,
             color: "#000",
             iconAnchor: [16, 37],
             popupAnchor: [0, -28]
@@ -225,14 +228,6 @@ MapInfo = function () {
                     service_tickets_layer.clearLayers();
                 } else {
                     service_tickets_layer.addTo(map);
-                }
-                var style_cart = {icon: cartIcon,
-                    icon: cartIcon,
-                    color: "#000",
-                    opacity: 0.4,
-                    iconAnchor: [16, 37],
-                    popupAnchor: [0, -28]
-
                 }
                 service_tickets_layer.addData(data.results);
                 loading.removeFrom(map);
@@ -334,32 +329,115 @@ MapInfo = function () {
         })
     });
 
+
+    $("#address").autocomplete({
+        source: function (request, response) {
+            $("#service_info").html("").hide();
+            var data = {};
+            var address = request.term.split(" ");
+            if (address.length > 1) {
+                data.street_name = address[1];
+            }
+            data.house_number = address[0];
+            $.ajax({
+                url: "http://stage1.gocartlogic.com/api/2/ticket/list/?format=geo",
+                dataType: "json",
+                data: data,
+                success: function (data) {
+                    if (data.results.length > 0) {
+                        $("#address_fill").val(data.results[0].location);
+                        var address_array = [];
+                        for (var i = 0; i < data.results.length; i++) {
+                            // jquery auto complete
+                            var address = data.results[i].properties.house_number + " " +
+                                    data.results[i].properties.street_name;
+                            data.results[i].value = address;
+                            data.results[i].label = address;
+                        }
+                        response(data.results);
+                    }
+
+
+                },
+                //Need to add Authorization Token to the call
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                }
+            });
+        },
+
+        //"http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
+        minLength: 2,
+        select: function (event, obj) {
+            // console.log(event);
+            if (map.hasLayer(house_layer)) {
+                house_layer.clearLayers();
+            } else {
+                house_layer.addTo(map);
+            }
+            house_layer.addData(obj.item);
+            house_layer.openPopup();
+            if (obj.item.properties.status == "OPEN") {
+                $("#service_info").html("<h4> Cart Service status is <u>OPEN</u><span class='glyphicon glyphicon-flag'>  </span></h4>" +
+                        "<br>Cart or carts have not been delivered").show()
+            } else {
+                $("#service_info").html("<h4> Cart Service status is <u>" + obj.item.properties.status +"</u><span class='glyphicon glyphicon-flag'>  </span></h4>" +
+                        "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart +", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.serviced_cart ).show()
+            }
+            map.setView([obj.item.geometry.coordinates[1], obj.item.geometry.coordinates[0]], 18);
+
+        },
+        autoFocus: true
+    });
+
+
 };
 
 
 //Call CartLogic ticket stats get completed by route totals
-        GetCartLogicStatus = function () {
+getCartLogicStatsByRoute = function () {
 
-            $.ajax({
-                        type: 'GET',
-                        url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
-                        dataType: 'json',
-                        success: function (data) {
-                            route_completed_services = data;
-                            MapInfo();
-                        },
-                        //Need to add Authorization Token to the call
-                        beforeSend: function (xhr) {
-                            xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
-                        }
-                    }
-            );
+    $.ajax({
+                type: 'GET',
+                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
+                dataType: 'json',
+                success: function (data) {
+                    route_completed_services = data;
+                    MapInfo();
+                },
+                //Need to add Authorization Token to the call
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                }
+            }
+    );
 
-            return route_completed_services;
+    return route_completed_services;
 
-        };
+};
 
-    GetCartLogicStatus();
+getCartLogicStatsByStatus = function () {
+
+    $.ajax({
+                type: 'GET',
+                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
+                dataType: 'json',
+                success: function (data) {
+                    //#TODO loop through data to overall stats
+                    console.log(data);
+
+                },
+                //Need to add Authorization Token to the call
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                }
+            }
+    );
+
+};
+
+getCartLogicStatsByRoute();
+getCartLogicStatsByStatus();
 
 
 </script>
