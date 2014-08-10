@@ -133,7 +133,7 @@ MapInfo = function () {
     var route_layer;
     var cart_window = function (feature, layer) {
         var service_cart = feature.properties.serviced_cart == null ? "No Serial" : feature.properties.serviced_cart;
-        layer.bindPopup('<b>STATUS:</b> <br />' + feature.properties.status + "<b>Address:</b> <br />' + feature.properties.house_number + ' ' + feature.properties.street_name
+        layer.bindPopup("<b>STATUS:</b> <br />" + feature.properties.status + "<b>Address:</b> <br />" + feature.properties.house_number + ' ' + feature.properties.street_name
                 + "<br /><b>Cart:</b> <br />size: " + feature.properties.cart_size + '  type: ' + feature.properties.cart_type
                 + '<br /><b>Serial </b> <br />' + service_cart);
     }
