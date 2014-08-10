@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <title>Naperville Cart Delivery Map</title>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
     <link rel="points" type="application/json" href="gis/naperville_collection_districts.geojson">
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-
     <!-- Optional theme -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
@@ -18,6 +18,10 @@
         #map {
             height: 700px;
             width: 500px;
+        }
+
+        input, label {
+            display: block;
         }
 
         .info {
@@ -57,16 +61,82 @@
 <body>
 <div>
     <div id="map"></div>
-    <div></div>
-    <div style="margin-left: 600px; margin-top:-500px;" class="ui-widget"><label for="address"><span class='glyphicon glyphicon-search'></span> Search
-        Address: </label><input id="address">
 
-        <div id="service_info" style="margin-left: 120px; display: none"></div>
+    <div style="margin-left: 600px; margin-top:-500px;" class="ui-widget">
+        <label for="address"><span class='glyphicon glyphicon-search'></span> Search Address: </label>
+        <input id="address">
+
+        <div id="service_info" style="display: none"></div>
+
     </div>
-
+    <div id="total_stats" style="float: right; margin-right: 80px; margin-top: -100px"></div>
 
 </div>
 <script type="application/javascript">
+
+google.load('visualization', '1.0', {'packages': ['corechart']});
+google.setOnLoadCallback(getCartLogicStatsByStatus);
+
+
+function getCartLogicStatsByStatus() {
+    var stats = {open: 0, completed: 0, unsuccessful: 0};
+    var total_records = 0;
+    var chart_data = new google.visualization.DataTable();
+
+    $.ajax({
+                type: 'GET',
+                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
+                dataType: 'json',
+                success: function (data) {
+                    //#TODO loop through data to overall stats
+                    $.each(data, function (index, obj) {
+                        total_records = total_records + obj.value;
+                        switch (obj.service_status) {
+                            case "OPEN":
+                                stats.open = obj.value;
+                                break;
+                            case "COMPLETED":
+                                console.log(obj.service_status);
+                                stats.completed = obj.value;
+                                break;
+                            case "UNSUCCESSFUL":
+                                stats.unsuccessful = obj.value;
+                                break;
+                            default:
+                                break;
+                        }
+                      });
+
+                    chart_data.addColumn('string', 'Status');
+                        chart_data.addColumn('number', 'Value');
+                        console.log(stats.completed, "test")
+                        chart_data.addRows([
+                            ['OPEN', stats.open],
+                            ['COMPLETED', stats.completed],
+                            ['UNSUCCESSFUL', stats.unsuccessful]
+                        ]);
+
+                        var options = {'title': 'Cart Services Status',
+                            'width': 475,
+                            'height': 300};
+
+                        var chart = new google.visualization.PieChart(document.getElementById('total_stats'));
+                        chart.draw(chart_data, options);
+
+
+
+                },
+                //Need to add Authorization Token to the call
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                }
+            }
+    );
+
+
+}
+
+
 var base_tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/joebeone.j45kje9k/{z}/{x}/{y}.png', {
     attribution: 'By Joe Bennett &copy CartLogic-Cascade Engineering, Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18
@@ -187,7 +257,6 @@ MapInfo = function () {
     function service_style(feature) {
         var icon = {};
         if (feature.properties.status == 'OPEN') {
-            console.log(feature.properties.status);
             icon = ticketIcon;
         } else {
             icon = cartIcon;
@@ -378,11 +447,11 @@ MapInfo = function () {
             house_layer.addData(obj.item);
             house_layer.openPopup();
             if (obj.item.properties.status == "OPEN") {
-                $("#service_info").html("<h4> Cart Service status is <u>OPEN</u><span class='glyphicon glyphicon-flag'>  </span></h4>" +
+                $("#service_info").html("<h4> Cart delivery status is <i>OPEN</i><span class='glyphicon glyphicon-flag'>  </span></h4>" +
                         "<br>Cart or carts have not been delivered").show()
             } else {
-                $("#service_info").html("<h4> Cart Service status is <u>" + obj.item.properties.status +"</u><span class='glyphicon glyphicon-flag'>  </span></h4>" +
-                        "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart +", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.serviced_cart ).show()
+                $("#service_info").html("<h4> Cart Delivery status is <i>" + obj.item.properties.status + "</i><span class='glyphicon glyphicon-trash'>  </span></h4>" +
+                        "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart + ", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.serviced_cart).show()
             }
             map.setView([obj.item.geometry.coordinates[1], obj.item.geometry.coordinates[0]], 18);
 
@@ -416,28 +485,7 @@ getCartLogicStatsByRoute = function () {
 
 };
 
-getCartLogicStatsByStatus = function () {
-
-    $.ajax({
-                type: 'GET',
-                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
-                dataType: 'json',
-                success: function (data) {
-                    //#TODO loop through data to overall stats
-                    console.log(data);
-
-                },
-                //Need to add Authorization Token to the call
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
-                }
-            }
-    );
-
-};
-
 getCartLogicStatsByRoute();
-getCartLogicStatsByStatus();
 
 
 </script>
