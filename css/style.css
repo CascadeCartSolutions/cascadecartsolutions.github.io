@@ -33,19 +33,33 @@ label {
     margin-right: 8px;
     opacity: 0.7;
 }
-
-.bar-chart{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width:100%;
-/*    height:100%;*/
+.bar-chart {
+    /*    position: absolute;*/
+    /*    top: 0;*/
+    /*    left: 0;*/
+    width: 100%;
+    /*    height:100%;*/
 }
-
+.transition {
+/*    border: 5px solid rgba(0, 0, 0, 0);*/
+    color: rgba(40, 0, 0, 1);
+    -webkit-transition: color 4s linear;
+    /* Saf3.2+, Chrome */
+    -moz-transition: color 4s linear;
+    /* FF3.7+ */
+    -o-transition: color 4s linear;
+    /* Opera 10.5 */
+    transition: color 4s linear;
+}
+/*
+.transition:hover {
+    color: rgba(0, 3, 60, 1);
+}
+*/
 @media(max-width:992px){
-    #map {
-    height: 300px;
+
+#map {
+    height: 350px;
     width: 100%;
 }
-    
 }

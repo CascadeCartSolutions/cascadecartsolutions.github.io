@@ -61,7 +61,7 @@ function getCartLogicStatsByStatus() {
 }
 
 
-var base_tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/joebeone.j45kje9k/{z}/{x}/{y}.png', {
+var base_tiles = L.tileLayer('http://{s}.tiles.mapbox.com/v3/cascadecontainer.idmmme3a/{z}/{x}/{y}.png', {
     attribution: 'By Joe Bennett &copy CartLogic-Cascade Engineering, Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
     maxZoom: 18
 })
@@ -89,7 +89,7 @@ legend.onAdd = function (map) {
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
         div.innerHTML =
-                '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+                '<i style="background:' + getColor(grades[i] + 1) + '" class="transition"></i> ' +
                 grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '%');
     }
 
@@ -267,10 +267,11 @@ MapInfo = function () {
             info.update(layer.feature.properties);
 
             layer.setStyle({
-                weight: 5,
-                color: '#666',
+                weight: 3,
+                color: '#ccc',
                 dashArray: '',
-                fillOpacity: 0.7
+                fillOpacity: 0.3,
+//                className: 'transition'
             });
             //Wont work in IE or Opera
             if (!L.Browser.ie && !L.Browser.opera) {
