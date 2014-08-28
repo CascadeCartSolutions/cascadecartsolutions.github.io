@@ -6,6 +6,18 @@ input,
 label {
     display: block;
 }
+
+#toolbar{
+    background: url("../img/toolbar_bg.png") repeat-x #4a6f1c;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    color: rgb(240,248,255);
+}
+
+#toolbar h4{
+    margin-left: 20px;
+}
+
 .info {
     padding: 10px 10px;
     font: 14px/16px Arial, Helvetica, sans-serif;
@@ -15,8 +27,8 @@ label {
     border-radius: 5px;
 }
 .ui-autocomplete-loading {
-    background: white url("img/ajax-loader.gif") right center no-repeat;
-    background-size: 16px 16px;
+    background: white url("../img/ajax-loader.gif") right center no-repeat;
+
 }
 .info h4 {
     margin: 0 0 5px;
@@ -40,6 +52,7 @@ label {
     width: 100%;
     /*    height:100%;*/
 }
+
 .transition {
 /*    border: 5px solid rgba(0, 0, 0, 0);*/
     color: rgba(40, 0, 0, 1);
@@ -62,4 +75,33 @@ label {
     height: 350px;
     width: 100%;
 }
+
 }
+
+#map {
+    padding: 15px;
+    margin-left: 10px;
+    border-style: solid;
+    border-color: darkgray;
+}
+
+
+.ui-autocomplete {
+    max-height: 100px;
+    height: 300px;
+    overflow-y: auto;
+    list-style: none;
+    font-size: 24px;
+}
+
+.ui-autocomplete li:hover{
+    background: darkseagreen;
+    cursor: pointer;
+}
+
+  /* IE 6 doesn't support max-height
+   * we use height instead, but this forces the menu to always be this tall
+   */
+   .ui-autocomplete {
+    width:  100px;
+  }

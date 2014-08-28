@@ -31,18 +31,21 @@ function getCartLogicStatsByStatus() {
                         }
                       });
 
-                    chart_data.addColumn('string', 'Status');
-                        chart_data.addColumn('number', 'Value');
-                        console.log(stats.completed, "test")
-                        chart_data.addRows([
-                            ['OPEN', stats.open],
-                            ['COMPLETED', stats.completed],
-                            ['UNSUCCESSFUL', stats.unsuccessful]
+                 //   chart_data.addColumn('string', 'Status');
+                  //      chart_data.addColumn('number', 'Value');
+                    var chart_data = google.visualization.arrayToDataTable(
+                        [
+                            ['Status', 'Value',  {role: 'style'}],
+                            ['OPEN', stats.open, "green"],
+                            ['COMPLETED', stats.completed, "green"],
+                            ['UNSUCCESSFUL', stats.unsuccessful, "green"]
                         ]);
 
-                        var options = {'title': 'Cart Services Status',
+                        var options = {'title': 'Total Cart Services Status',
                             'width': 475,
-                            'height': 300};
+                            'height': 300,
+                            'legend': 'none'
+                        };
 
                         var chart = new google.visualization.BarChart(document.getElementById('total_stats'));
                         chart.draw(chart_data, options);
@@ -202,7 +205,7 @@ MapInfo = function () {
             opacity: 1,
             color: 'white',
             dashArray: '3',
-            fillOpacity: 0.71
+            fillOpacity: 0.75
         };
     }
 
@@ -270,7 +273,7 @@ MapInfo = function () {
                 weight: 3,
                 color: '#ccc',
                 dashArray: '',
-                fillOpacity: 0.3,
+                fillOpacity: 0.3
 //                className: 'transition'
             });
             //Wont work in IE or Opera

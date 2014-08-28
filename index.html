@@ -14,29 +14,44 @@
     <!-- Optional theme -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/functions.js"></script>
 
 </head>
 <body>
 <div class="container-fluid">
+    <div class="row"  id="toolbar"><h4>Naperville Recycle Cart Delivery Map</h4></div>
     <div class="row">
-        <div class="col-md-6" style="padding:0px">
-    <div id="map"></div>
-</div>
-        <div class="col-xs-6 col-md-2" style="">
-            
-    <div style="padding-top:50px;" class="ui-widget">
-        <label for="address"><span class='glyphicon glyphicon-search'></span> Search Address: </label>
-        <input id="address">
-        <div id="service_info" style="display: none"></div>
-</div></div><div class="col-xs-4" style="">
-        
+        <div class="col-md-12" style="padding:10px; font-size: 14px">
+<p>
+    <div class="row" style="padding-left: 30px"><img  src="img/naperville_logo.jpg" width="10%" height="10%"></div><br><br>
+      The <a href="http://www.naperville.il.us/curbsiderecycling.aspx">City of Naperville</a> is pleased to introduce a new recycling cart program for residents who are currently receiving curbside recycling service from the City.  The new program provides residents with recycling carts made of a sturdy commercial-grade plastic with wheels for easy movement and hinged lids to contain items and minimize animal pilferage and blowing trash. The new carts offer a clean and convenient way for residents to dispose of recyclables and increase their recycling capacity.
 
-    
-            <div id="total_stats" class="bar-chart"></div>
-            </div></div>
-        <div class="clearfix"></div>
-    
+Beginning Tuesday, September 2, 2014, blue wheeled recycling carts with recycling program information will start being delivered to residents. It is expected to take a few weeks to complete delivery to all residents and once you receive your cart, you should begin using it.
+
+The City will no longer pick up recycling from any other recycling container once residents receive their new recycling carts.  Residents may recycle their old bins at the Recycling Drop-Off Center at 180 Fort Hill Drive anytime from 8 a.m. to 4:00 p.m. Tuesday, Thursday and Saturdays.  For more information, visit <a href="http://www.naperville.il.us/curbsiderecycling.aspx">http://www.naperville.il.us/curbsiderecycling.aspx</a>
+
+<br><br>Republic Services is the City's recycling contractor. If you have any additional questions regarding recyclable materials, please call <b>Republic Services Customer Service</b> at (630) 723-2800.</div>
+</p>
+ </div>
+    <div  class="row">
+        <div class="col-md-6" style="padding:0px">
+            <div id="map"></div>
+        </div>
+        <div class="col-xs-6 col-md-2" style="">
+
+            <div style="padding-top:50px;" class="ui-widget">
+                <label for="address"  style="font-size:24px;"><span class='glyphicon glyphicon-search'></span> Search Address: </label>
+                <input id="address" style="padding-left: 15px; font-size:24px;">
+
+                <div id="service_info" style="display: none"></div>
+            </div>
+        </div>
+        <div class="col-xs-4" style="">
+           <div id="total_stats" class="bar-chart"></div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+
 </div>
-    </body>
-    </html>
+<script src="js/functions.js"></script>
+</body>
+</html>
