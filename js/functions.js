@@ -9,7 +9,7 @@ function getCartLogicStatsByStatus() {
 
     $.ajax({
                 type: 'GET',
-                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
+                url: "http://field.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
                 dataType: 'json',
                 success: function (data) {
                     //#TODO loop through data to overall stats
@@ -55,7 +55,7 @@ function getCartLogicStatsByStatus() {
                 },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                    xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
                 }
             }
     );
@@ -216,7 +216,7 @@ MapInfo = function () {
         //#TODO call with bounding box parameters
         $.ajax({
             type: 'GET',
-            url: 'http://stage1.gocartlogic.com/api/2/ticket/list/?format=geo&page_size=1000',
+            url: 'http://field1.gocartlogic.com/api/2/ticket/list/?format=geo&page_size=300',
             data: {'bounding_box': min_lat_lon[0] + "," + min_lat_lon[1] + "," + max_lat_lon[0] + "," + max_lat_lon[1] },
             success: function (data) {
                 $(".info").hide();
@@ -232,7 +232,7 @@ MapInfo = function () {
             },
             //Need to add Authorization Token to the call
             beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
             }
 
         });
@@ -337,7 +337,7 @@ MapInfo = function () {
             }
             data.house_number = address[0];
             $.ajax({
-                url: "http://stage1.gocartlogic.com/api/2/ticket/list/?format=geo",
+                url: "http://field1.gocartlogic.com/api/2/ticket/list/?format=geo",
                 dataType: "json",
                 data: data,
                 success: function (data) {
@@ -358,12 +358,12 @@ MapInfo = function () {
                 },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                    xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
                 }
             });
         },
 
-        //"http://stage1.gocartlogic.com/api/2/cart/list/?format=json",
+
         minLength: 2,
         select: function (event, obj) {
             // console.log(event);
@@ -396,7 +396,7 @@ getCartLogicStatsByRoute = function () {
 
     $.ajax({
                 type: 'GET',
-                url: "http://stage1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
+                url: "http://field1.gocartlogic.com/api/2/ticket/stats?status=COMPLETED&report_on=route&format=json",
                 dataType: 'json',
                 success: function (data) {
                     route_completed_services = data;
@@ -404,7 +404,7 @@ getCartLogicStatsByRoute = function () {
                 },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token 18bcd8e461769609279c8d988723627c06479193");
+                    xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
                 }
             }
     );
