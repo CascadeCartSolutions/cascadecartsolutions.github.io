@@ -9,7 +9,7 @@ function getCartLogicStatsByStatus() {
 
     $.ajax({
                 type: 'GET',
-                url: "http://field.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
+                url: "http://field1.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json",
                 dataType: 'json',
                 success: function (data) {
                     //#TODO loop through data to overall stats
