@@ -107,9 +107,9 @@ info.onAdd = function (map) {
 };
 
 info.update = function (properties) {
-    this.__div.innerHTML = '<h4>Waste Area</h4>' + (properties ?
+    this.__div.innerHTML = '<h4>Delivery Area</h4>' + (properties ?
             '<b>' + properties.DISTAREA + '</b><br /><br />' + properties.COMPLETED.toFixed(0) + '% COMPLETE</h3>'
-            : 'Hover over a waste district to show % complete.');
+            : 'Hover over a Map to show % complete.');
 };
 
 loading.update = function () {
