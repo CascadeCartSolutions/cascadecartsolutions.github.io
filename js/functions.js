@@ -20,7 +20,6 @@ function getCartLogicStatsByStatus() {
                                 stats.open = obj.value;
                                 break;
                             case "COMPLETED":
-                                console.log(obj.service_status);
                                 stats.completed = obj.value;
                                 break;
                             case "UNSUCCESSFUL":
@@ -75,13 +74,12 @@ var loading = L.control({position: 'topright'});
 var legend = L.control({position: 'bottomright'});
 
 function getColor(count) {
-    return count >= 100 ? '#238b45' :
-                    count >= 75 ? '#74c476' :
-                    count >= 50 ? '#bae4b3' :
-                    count >= 25 ? '#edf8e9' :
-            '#edf8e9';
+    return count > 100 ? '#238b45' :
+                    count > 75 ? '#74c476' :
+                    count > 50 ? '#bae4b3' :
+                    count > 25 ? '#edf8e9' :
+                    '#edf8e9';
 }
-
 
 legend.onAdd = function (map) {
 
@@ -91,8 +89,8 @@ legend.onAdd = function (map) {
 
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
-        div.innerHTML =
-                '<i style="background:' + getColor(grades[i] + 1) + '" class="transition"></i> ' +
+        div.innerHTML +=
+                '<i style="background:' + getColor(grades[i] + 1) + '"class="transition"></i> ' +
                 grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '%');
     }
 
@@ -292,8 +290,9 @@ MapInfo = function () {
         map = L.map('map').fitBounds(route_layer.getBounds());
         base_tiles.addTo(map);
         route_layer.addTo(map);
-        info.addTo(map);
         legend.addTo(map);
+        info.addTo(map);
+
 
 
         map.on('moveend', function () {
