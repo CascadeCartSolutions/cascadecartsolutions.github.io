@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html ng-app="Charting">
+<head lang="en">
+    <meta charset="UTF-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--other css libraries-->
+    <link rel="stylesheet" href="http://cdn.oesmith.co.uk/morris-0.5.1.css">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/jumbotron.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+    <link type="text/css" rel="stylesheet" media="all" href="http://code.jquery.com/jquery-ui-1.8.18.custom.css" >
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <title>Dashboard</title>
+</head>
+<body ng-controller="getDonut">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+
+      </div>
+    </div>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3"><img src="img/CartLogic-cart_ccs.png"/></div>
+                <div class="col-md-9">
+                     <h1>Cart Services Dashboard</h1>
+                    <p>Welcome to the CartLogic<sup>TM</sup></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-8">
+          <h2>Completed Tickets in the Last 7 Days</h2>
+          <div id="ticketsbyday" style="height: 250px;"></div>
+        </div>
+
+        <div class="col-md-4">
+          <h2>Ticket Summary</h2>
+         <div id="ticketsdonut" style="height: 250px;"></div>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="row">
+
+
+
+              <!--Address textbox -->
+              <div class="col-md-7">
+                 <div style="padding-top:30px;" class="ui-widget">
+                    <label class="sr-only" for="address">Search by Address</label>
+                    <input id="address" class="input-lg input-mysize" type="text" placeholder="Enter an Address"/>
+
+                 </div>
+              </div>
+          <div class="col-med-5" style="padding-left: 30px">
+              <div id="service_info" style="display: none"></div>
+          </div>
+
+
+                <!--Tickets list-->
+             <!-- <div class="col-md-5 center ticket_div">
+                  <Table class="table table-striped ticket_table">
+                      <tr>
+                          <th class="text-center">
+                              Address
+                          </th>
+                          <th class="text-center">
+                              Status
+                          </th>
+                      </tr>
+                  </Table>
+              </div>-->
+
+
+
+      </div>
+    </div>
+
+</body>
+      <footer>
+        <p>© Company 2014</p>
+      </footer>
+ <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script src="http://code.jquery.com/jquery-ui-1.8.11.custom.min.js"></script>
+    <script type="text/javascript" src="js/angular-1.2.25/angular.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/morris.min.js"></script>
+    <script src="js/raphael.js"></script>
+    <script src="js/chartdata.js"></script>
+
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+     <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+
+</html>

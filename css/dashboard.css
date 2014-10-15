@@ -1,0 +1,52 @@
+/**
+ * Created by andytus on 9/30/14.
+ */
+.input-mysize {
+    width:100%;
+
+}
+.button_move {
+    padding-right: 25px;
+}
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+.ticket_table {
+    width: 100%;
+
+}
+.ticket_div {
+     padding-left: 20px;
+}
+
+.info {
+    padding: 10px 10px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+.ui-autocomplete-loading {
+    background: white url("../img/ajax-loader.gif") right center no-repeat;
+}
+.ui-autocomplete {
+    max-height: 100px;
+    height: 300px;
+    overflow-y: auto;
+    list-style: none;
+    font-size: 15px;
+}
+
+.ui-autocomplete li:hover{
+    background: darkseagreen;
+    cursor: pointer;
+}
+
+  /* IE 6 doesn't support max-height
+   * we use height instead, but this forces the menu to always be this tall
+   */
+   .ui-autocomplete {
+    width:  100px;
+  }
