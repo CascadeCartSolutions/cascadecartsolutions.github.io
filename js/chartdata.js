@@ -81,11 +81,12 @@ app.controller('getDonut', function($http){
         console.log("failed to get chart data. "+ status)
     });
 //fills bar graph
-     var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json', {
+   var response1= $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
+     /*var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json', {
                 headers: {
                     'Authorization': 'Token c677850e73935e91cd2d41ed646cd58bc571053b'
                 }
-                });
+                });*/
     response1.success(function(data, status, headers, config){
 
     //console.log(data);
