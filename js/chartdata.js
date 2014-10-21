@@ -52,11 +52,7 @@ app.controller('getDonut', function($http){
 //Gets data for the donut chart
 //    var site_id = getParameterByName('site');
     var site_id = QueryString.site
-    var response = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json', {
-                headers: {
-                    'Authorization': 'Token c677850e73935e91cd2d41ed646cd58bc571053b'
-                }
-                });
+    var response = $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json');
     var ticketPromise = [ ];
     response.success(function(data, status, headers, config){
         ticketPromise = data;
@@ -193,6 +189,8 @@ $(document).ready(function() {
                 url: 'http://' + site_id +'.gocartlogic.com/api/2/ticket/list/?format=geo',
                 dataType: "json",
                 data: data,
+                type: "GET",
+                contentType: 'text/plain',
                 success: function (data) {
                     if (data.results.length > 0) {
                         $("#address_fill").val(data.results[0].location);
