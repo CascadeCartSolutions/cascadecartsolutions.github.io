@@ -1,7 +1,30 @@
 /**
  * Created by andytus on 9/25/14.
  */
+var QueryString = function () {
+  // This function is anonymous, is executed immediately and
+  // the return value is assigned to QueryString!
+  var query_string = {};
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+    	// If first entry with this name
+    if (typeof query_string[pair[0]] === "undefined") {
+      query_string[pair[0]] = pair[1];
+    	// If second entry with this name
+    } else if (typeof query_string[pair[0]] === "string") {
+      var arr = [ query_string[pair[0]], pair[1] ];
+      query_string[pair[0]] = arr;
+    	// If third or later entry with this name
+    } else {
+      query_string[pair[0]].push(pair[1]);
+    }
+  }
+    return query_string;
+} ();
 
+/*
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -18,6 +41,7 @@ String.prototype.replaceAll = function(search, replace)
 
     return this.replace(new RegExp('[' + search + ']', 'g'), replace);
 };
+*/
 
 (function(){
 var app = angular.module('Charting', []);
@@ -26,8 +50,8 @@ var app = angular.module('Charting', []);
 app.controller('getDonut', function($http){
 
 //Gets data for the donut chart
-    var site_id = getParameterByName('site');
-
+//    var site_id = getParameterByName('site');
+    var site_id = QueryString.site
     var response = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json')
     var ticketPromise = [ ];
     response.success(function(data, status, headers, config){
@@ -158,7 +182,8 @@ $(document).ready(function() {
                 data.street_name = address[1];
             }
             data.house_number = address[0];
-            var site_id = getParameterByName('site');
+//            var site_id = getParameterByName('site');
+            var site_id = QueryString.site
             $.ajax({
                 url: 'http://' + site_id +'.gocartlogic.com/api/2/ticket/list/?format=geo',
                 dataType: "json",
