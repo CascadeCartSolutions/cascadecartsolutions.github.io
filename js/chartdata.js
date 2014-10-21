@@ -6,7 +6,7 @@ var QueryString = function () {
   // the return value is assigned to QueryString!
   var query_string = {};
   var query = window.location.search.substring(1);
-  var vars = query.split("&");
+  var vars = query.split("?");
   for (var i=0;i<vars.length;i++) {
     var pair = vars[i].split("=");
     	// If first entry with this name
@@ -78,7 +78,7 @@ app.controller('getDonut', function($http){
     });
     response.error(function(data, status, headers, config){
         alert("failed to get chart data!");
-        console.log("failed to get chart data. "+ error)
+        console.log("failed to get chart data. "+ status)
     });
 //fills bar graph
      var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json', {
