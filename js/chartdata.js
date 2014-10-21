@@ -143,8 +143,8 @@ $(document).ready(function() {
 
                 },
                 //Need to add Authorization Token to the call
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token c677850e73935e91cd2d41ed646cd58bc571053b");
+                beforeSend: function (xdr) {
+                    xdr.setRequestHeader("Authorization", "Token c677850e73935e91cd2d41ed646cd58bc571053b");
                 }
             });
         },
