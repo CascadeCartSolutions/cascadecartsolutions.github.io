@@ -52,7 +52,11 @@ app.controller('getDonut', function($http){
 //Gets data for the donut chart
 //    var site_id = getParameterByName('site');
     var site_id = QueryString.site
-    var response = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json')
+    var response = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json', {
+                headers: {
+                    'Authorization': 'Token c677850e73935e91cd2d41ed646cd58bc571053b'
+                }
+                });
     var ticketPromise = [ ];
     response.success(function(data, status, headers, config){
         ticketPromise = data;
@@ -74,12 +78,12 @@ app.controller('getDonut', function($http){
     });
     response.error(function(data, status, headers, config){
         alert("failed to get chart data!");
-        console.log("failed to get chart data.")
+        console.log("failed to get chart data. "+ error)
     });
 //fills bar graph
-     var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=7&format=json', {
+     var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json', {
                 headers: {
-                    'Authorization': 'Token eef7363d4294f12d425a3e5dfb6b65ebfd897877'
+                    'Authorization': 'Token c677850e73935e91cd2d41ed646cd58bc571053b'
                 }
                 });
     response1.success(function(data, status, headers, config){
@@ -206,7 +210,7 @@ $(document).ready(function() {
                 },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
+                    xhr.setRequestHeader("Authorization", "Token c677850e73935e91cd2d41ed646cd58bc571053b");
                 }
             });
         },
