@@ -24,34 +24,16 @@ var QueryString = function () {
     return query_string;
 } ();
 
-/*
-function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-
-String.prototype.replaceAll = function(search, replace)
-{
-    //if replace is null, return original string otherwise it will
-    //replace search string with 'undefined'.
-    if(!replace)
-        return this;
-
-    return this.replace(new RegExp('[' + search + ']', 'g'), replace);
-};
-*/
 
 (function(){
 var app = angular.module('Charting', []);
 
 
-app.controller('getDonut', function($http){
+app.controller('getDonut', function(){
 
 //Gets data for the donut chart
-//    var site_id = getParameterByName('site');
-    var site_id = QueryString.site
+
+    var site_id = QueryString.site;
     var response = $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json');
     var ticketPromise = [ ];
     response.success(function(data, status, headers, config){
@@ -78,11 +60,7 @@ app.controller('getDonut', function($http){
     });
 //fills bar graph
    var response1= $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
-     /*var response1 = $http.get('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json', {
-                headers: {
-                    'Authorization': 'Token c677850e73935e91cd2d41ed646cd58bc571053b'
-                }
-                });*/
+
     response1.success(function(data, status, headers, config){
 
     //console.log(data);
@@ -126,55 +104,12 @@ app.controller('getDonut', function($http){
 });
 })();
 
-function sortDatabyDay(datain) {
-    //console.log("data in " + datain);
-    var results = datain['results'];
-    //console.log("trimmed data to results " + results);
-    var list = [ ];
-    for (var i = 0; i < results.length; i++) {
-        var currentResultDate = results[i]['date_completed'].substring(0, results[i]['date_completed'].indexOf('T'));
-        currentResultDate = currentResultDate.trim();
-        //console.log("trimmed dates '" + currentResultDate +"'");
-        if (i == 0) {
-            list.push([currentResultDate, 1]);
-            console.log("list push from 0")
-        } else {
-            var countd = 0;
-            var dup = false;
-            for (var d = 0; d < list.length; d++) {
 
-                if (list[d][0] === currentResultDate) {
-                    console.log("found date '" + currentResultDate +"'");
-                    countd = d;
-                    dup = true;
-
-                } else {
-                    dup = false;
-
-                }
-
-            }
-            if(dup === true) {
-                list[countd][1]++;
-                console.log('adding 1 to ' + currentResultDate + " @ " + countd)
-                countd = 0;
-                dup = false;
-            }else{
-
-                list.push([currentResultDate, 1]);
-                console.log("list push from iteration. "+ currentResultDate)
-            }
-}
-
-    } return list;
-
-
-}
 
 var items;
 $(document).ready(function() {
 
-    $("input#address").autocomplete({
+    $("#address").autocomplete({
         source: function (request, response) {
             $("#service_info").html("").hide();
             var data = {};
@@ -183,7 +118,7 @@ $(document).ready(function() {
                 data.street_name = address[1];
             }
             data.house_number = address[0];
-//            var site_id = getParameterByName('site');
+
             var site_id = QueryString.site
             $.ajax({
                 url: 'http://' + site_id +'.gocartlogic.com/api/2/ticket/list/?format=geo',
