@@ -125,7 +125,10 @@ $(document).ready(function() {
                 dataType: "json",
                 data: data,
                 type: "GET",
-                contentType: 'text/plain',
+                headers: {
+                  "Authorization" :"Token c677850e73935e91cd2d41ed646cd58bc571053b",
+                  "Content-Type" :"application/json"
+                },
                 success: function (data) {
                     if (data.results.length > 0) {
                         $("#address_fill").val(data.results[0].location);
