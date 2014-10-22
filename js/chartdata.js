@@ -108,8 +108,9 @@ app.controller('getDonut', function(){
 
 var items;
 $(document).ready(function() {
-
+jQuery.support.cors = true;
     $("#address").autocomplete({
+
         source: function (request, response) {
             $("#service_info").html("").hide();
             var data = {};
@@ -119,13 +120,13 @@ $(document).ready(function() {
             }
             data.house_number = address[0];
 
-            var site_id = QueryString.site
+            var site_id = QueryString.site;
+
             $.ajax({
                 url: 'http://' + site_id +'.gocartlogic.com/api/2/ticket/list/?format=geo',
                 dataType: "json",
                 data: data,
                 type: "GET",
-                headers: { "Authorization": "Token c677850e73935e91cd2d41ed646cd58bc571053b"},
                 success: function (data) {
                     if (data.results.length > 0) {
                         $("#address_fill").val(data.results[0].location);
@@ -143,6 +144,7 @@ $(document).ready(function() {
 
                 },
                 //Need to add Authorization Token to the call
+
                 beforeSend: function (xdr) {
                     xdr.setRequestHeader("Authorization", "Token c677850e73935e91cd2d41ed646cd58bc571053b");
                 }
