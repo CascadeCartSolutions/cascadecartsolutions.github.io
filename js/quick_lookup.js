@@ -69,6 +69,6 @@ startLookup = function(){
             }
     );
 };
-
+jQuery.support.cors = true;
 startLookup();
 
