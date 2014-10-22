@@ -47,9 +47,9 @@ app.controller('getDonut', function(){
               {label: ticketPromise[1]["service_status"], value: ticketPromise[1]["value"]},
               {label: ticketPromise[2]["service_status"], value: ticketPromise[2]["value"]}
            ],
-        colors: ['#960811',
-                 '#0404B0',
-                 '#00701C'
+        colors: ['#f26649',
+                 '#0079c1',
+                 '#7ac143'
 
         ]
 
@@ -86,7 +86,7 @@ app.controller('getDonut', function(){
             { day: '2014-02-16', Completed: 1236, Unsuccessful:26}
         ],*/
         data: data,
-        lineColors:['#00701C'],
+        lineColors:['#7ac143'],
         // The name of the data record attribute that contains x-values.
         xkey: 'date',
         xLabels: 'date',
