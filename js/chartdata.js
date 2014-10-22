@@ -109,7 +109,7 @@ app.controller('getDonut', function(){
 
 var items;
 $(document).ready(function() {
-jQuery.support.cors = true;
+
     $("#address").autocomplete({
 
         source: function (request, response) {
