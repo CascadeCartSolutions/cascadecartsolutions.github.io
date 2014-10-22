@@ -34,11 +34,12 @@ app.controller('getDonut', function(){
 //Gets data for the donut chart
 
     var site_id = QueryString.site;
-    var response = $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json');
+    var response = $.ajax({url:'http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json'});
     var ticketPromise = [ ];
+    response.type = "GET";
+    response.dataType = "json";
     response.success(function(data, status, headers, config){
         ticketPromise = data;
-
         new Morris.Donut({
         element: 'ticketsdonut',
         data:[
@@ -59,7 +60,7 @@ app.controller('getDonut', function(){
         console.log("failed to get chart data. "+ status)
     });
 //fills bar graph
-   var response1= $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
+   var response1= $.ajax('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
 
     response1.success(function(data, status, headers, config){
 
@@ -110,6 +111,7 @@ var items;
 $(document).ready(function() {
 
     $("#address").autocomplete({
+
         source: function (request, response) {
             $("#service_info").html("").hide();
             var data = {};
@@ -119,13 +121,13 @@ $(document).ready(function() {
             }
             data.house_number = address[0];
 
-            var site_id = QueryString.site
+            var site_id = QueryString.site;
+
             $.ajax({
                 url: 'http://' + site_id +'.gocartlogic.com/api/2/ticket/list/?format=geo',
                 dataType: "json",
                 data: data,
                 type: "GET",
-                headers: { "Authorization": "Token c677850e73935e91cd2d41ed646cd58bc571053b"},
                 success: function (data) {
                     if (data.results.length > 0) {
                         $("#address_fill").val(data.results[0].location);
@@ -143,6 +145,7 @@ $(document).ready(function() {
 
                 },
                 //Need to add Authorization Token to the call
+
                 beforeSend: function (xdr) {
                     xdr.setRequestHeader("Authorization", "Token c677850e73935e91cd2d41ed646cd58bc571053b");
                 }
