@@ -34,11 +34,12 @@ app.controller('getDonut', function(){
 //Gets data for the donut chart
 
     var site_id = QueryString.site;
-    var response = $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json');
+    var response = $.ajax({url:'http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json'});
     var ticketPromise = [ ];
+    response.type = "GET";
+    response.dataType = "json";
     response.success(function(data, status, headers, config){
         ticketPromise = data;
-
         new Morris.Donut({
         element: 'ticketsdonut',
         data:[
@@ -59,7 +60,7 @@ app.controller('getDonut', function(){
         console.log("failed to get chart data. "+ status)
     });
 //fills bar graph
-   var response1= $.getJSON('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
+   var response1= $.ajax('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
 
     response1.success(function(data, status, headers, config){
 
