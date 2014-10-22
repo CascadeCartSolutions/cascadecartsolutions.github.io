@@ -1,4 +1,4 @@
-//Created by Joe Bennett
+// Created by Joe Bennett
 
 var QueryString = function () {
   // This function is anonymous, is executed immediately and
