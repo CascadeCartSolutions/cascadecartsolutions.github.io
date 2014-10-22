@@ -58,6 +58,10 @@ startLookup = function(){
                     }
 
                 },
+
+               error: function(w,t,f){
+                 console.log(w + "\n" + t + "\n" + f);
+               },
                 //Need to add Authorization Token to the call
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "Token aad7330568b93df92e2097e9f89775c8c463abe7");
