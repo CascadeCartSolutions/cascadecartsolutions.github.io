@@ -75,7 +75,7 @@ var burnUp =0;
         lineColors:['#7ac143'],
         // The name of the data record attribute that contains x-values.
         xkey: 'date',
-        xLabels: 'date',
+        xLabels: 'day',
         // A list of names of data record attributes that contain y-values.
         ykeys: ['value'],
         // Labels for the ykeys -- will be displayed when you hover over the
@@ -118,11 +118,12 @@ var burnUp =0;
           lineColors:['#7ac143'],
           // The name of the data record attribute that contains x-values.
           xkey: 'date',
-          xLabels: 'date',
+          xLabels: 'day',
           // A list of names of data record attributes that contain y-values.
           ykeys: ['value'],
           //max value of y
           ymax: burnUp,
+
           // Labels for the ykeys -- will be displayed when you hover over the
           // chart.
           labels: ['Completed']
@@ -193,7 +194,7 @@ $(document).ready(function() {
                     "<br>Cart or carts have not been delivered").show()
             } else if (obj.item.properties.status == "COMPLETED") {
                 $("#service_info").html("<h4> Cart Delivery status is <i style='color: #7ac143'>" + obj.item.properties.status + "</i> <span class='glyphicon glyphicon-trash'>  </span></h4>" +
-                    "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart + ", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.cart_size +
+                    "<br><b>Cart RFID number: </b> " + obj.item.properties.serviced_cart + ", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.cart_size +
                     ", <b>Date Completed: </b> " + obj.item.properties.date_completed).show()
             } else {
                 $("#service_info").html("<h4> Cart Delivery status is <i style='color: #f26649'>" + obj.item.properties.status + "</i> <span class='glyphicon glyphicon-trash'>  </span></h4>" +
