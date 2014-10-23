@@ -30,9 +30,8 @@ var app = angular.module('Charting', []);
 
 
 app.controller('getDonut', function(){
-
 //Gets data for the donut chart
-
+var burnUp =0;
     var site_id = QueryString.site;
     var response = $.ajax({url:'http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=status&format=json'});
     var ticketPromise = [ ];
@@ -40,6 +39,8 @@ app.controller('getDonut', function(){
     response.dataType = "json";
     response.success(function(data, status, headers, config){
         ticketPromise = data;
+          burnUp = ticketPromise[0]["value"] + ticketPromise[1]["value"] + ticketPromise[2]["value"];
+
         new Morris.Donut({
         element: 'ticketsdonut',
         data:[
@@ -47,44 +48,29 @@ app.controller('getDonut', function(){
               {label: ticketPromise[1]["service_status"], value: ticketPromise[1]["value"]},
               {label: ticketPromise[2]["service_status"], value: ticketPromise[2]["value"]}
            ],
-        colors: ['#f26649',
-                 '#0079c1',
-                 '#7ac143'
+        colors: ['#f26649',//red
+                 '#0079c1',//blue
+                 '#7ac143'//green
 
         ]
 
         });
+
     });
     response.error(function(data, status, headers, config){
         alert("failed to get chart data!");
         console.log("failed to get chart data. "+ status)
     });
 //fills bar graph
-   var response1= $.ajax('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
+    var response1= $.ajax('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=14&format=json');
 
     response1.success(function(data, status, headers, config){
-
-    //console.log(data);
-    //console.log(sortDatabyDay(data));
-     //var semi = sortDatabyDay(data);
-        //var final = [ ];
-        //for(var d = 0;d < data.length; d++){
-        // final.push({day: data[d][0], Completed:data[d][1]})
-
-        //}
-        //console.log(final);
+//14 days Completed tickets line Graph.
         new Morris.Line({
         // ID of the element in which to draw the chart.
         element: 'ticketsbyday',
         // Chart data records -- each entry in this array corresponds to a point on
         // the chart.
-        /*data: [
-            { day: '2014-02-12', Completed: 780, Unsuccessful:13},
-            { day: '2014-02-13', Completed: 465, Unsuccessful:0},
-            { day: '2014-02-14', Completed: 947, Unsuccessful:7},
-            { day: '2014-02-15', Completed: 845, Unsuccessful:3},
-            { day: '2014-02-16', Completed: 1236, Unsuccessful:26}
-        ],*/
         data: data,
         lineColors:['#7ac143'],
         // The name of the data record attribute that contains x-values.
@@ -95,10 +81,56 @@ app.controller('getDonut', function(){
         // Labels for the ykeys -- will be displayed when you hover over the
         // chart.
         labels: ['Completed']
-    });
+        });
 
     });
     response1.error(function(data, status, headers, config){
+        alert("failed to get chart data!");
+        console.log("failed to get chart data.")
+    });
+
+     var response2= $.ajax('http://' + site_id + '.gocartlogic.com/api/2/ticket/stats?report_on=date_completed&days=100&format=json');
+
+    response2.success(function(data, status, headers, config){
+
+//Adds ticket Count.
+      //1 second delay for adding  burnup chart due to chart loading faster then the ymax:burnup variable
+        setTimeout(function(){
+        var final = [ ];
+        var count = 0;
+        var openCount = burnUp;
+        for(var d = 0;d < data.length; d++){
+          count = count + data[d]["value"];
+
+            final.push({date: data[d]['date'], value:count})
+
+        }
+
+
+        //burn up chart
+          new Morris.Area({
+          // ID of the element in which to draw the chart.
+          element: 'burnup',
+          behaveLikeLine: true,
+          // Chart data records -- each entry in this array corresponds to a point on
+          // the chart.
+          data: final,
+          lineColors:['#7ac143'],
+          // The name of the data record attribute that contains x-values.
+          xkey: 'date',
+          xLabels: 'date',
+          // A list of names of data record attributes that contain y-values.
+          ykeys: ['value'],
+          //max value of y
+          ymax: burnUp,
+          // Labels for the ykeys -- will be displayed when you hover over the
+          // chart.
+          labels: ['Completed']
+          });
+        },1000);
+
+    });
+    response2.error(function(data, status, headers, config){
         alert("failed to get chart data!");
         console.log("failed to get chart data.")
     });
@@ -155,14 +187,17 @@ $(document).ready(function() {
 
         minLength: 2,
         select: function (event, obj) {
-            // console.log(event);
 
             if (obj.item.properties.status == "OPEN") {
-                $("#service_info").html("<h4> Cart delivery status is <i>OPEN</i><span class='glyphicon glyphicon-flag'>  </span></h4>" +
+                $("#service_info").html("<h4> Cart delivery status is <i style='color: #0079c1'>OPEN </i><span class='glyphicon glyphicon-flag'>  </span></h4>" +
                     "<br>Cart or carts have not been delivered").show()
+            } else if (obj.item.properties.status == "COMPLETED") {
+                $("#service_info").html("<h4> Cart Delivery status is <i style='color: #7ac143'>" + obj.item.properties.status + "</i> <span class='glyphicon glyphicon-trash'>  </span></h4>" +
+                    "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart + ", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.cart_size +
+                    ", <b>Date Completed: </b> " + obj.item.properties.date_completed).show()
             } else {
-                $("#service_info").html("<h4> Cart Delivery status is <i>" + obj.item.properties.status + "</i> <span class='glyphicon glyphicon-trash'>  </span></h4>" +
-                    "<br><b>Cart serial number: </b> " + obj.item.properties.serviced_cart + ", <b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.cart_size).show()
+                $("#service_info").html("<h4> Cart Delivery status is <i style='color: #f26649'>" + obj.item.properties.status + "</i> <span class='glyphicon glyphicon-trash'>  </span></h4>" +
+                    "<br><b>Type: </b>" + obj.item.properties.cart_type + ", <b>Size: </b>" + obj.item.properties.cart_size).show()
             }
 
 
